@@ -102,3 +102,40 @@ exports.deleteTodoListId = async (req, res) => {
 };
 
 
+exports.getTodoListByDate = async (req, res) => {
+    const { date } = req.params;
+    const userId = req.user.id;
+
+    let filter = { user: userId };
+
+    if(!userId){
+        return res.status(400).json({ message: 'User not found. '});
+    }
+
+    try{
+        const selectedDate = new Date(date);
+       if (isNaN(selectedDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid date format provided in URL. Use YYYY-MM-DD.' });
+        }
+        selectedDate.setUTCHours(0, 0, 0, 0);
+        
+        const nextDay = new Date(selectedDate);
+        nextDay.setUTCDate(selectedDate.getUTCDate() + 1);
+
+        filter.createdAt = {
+            $gte: selectedDate, 
+            $lt: nextDay 
+        };
+
+            const todoDate = await TodoList.find(filter).sort({ createdAt: -1});
+            res.status(200).json({
+            message: `Found to-do-list for date ${date}.`,
+            todoList: todoDate
+            });
+            
+        } catch(error){
+            console.log('Error fetching item by date. ', error);
+            return res.status(500).json({
+                message: 'Server error findind To-Do-List date. '});
+        }
+};
