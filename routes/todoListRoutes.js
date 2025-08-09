@@ -6,6 +6,8 @@ const jwtToken = require('../middleware/jwtToken');
 
 router.post('/createTodoList', jwtToken.protect, todoListController.createTodoList);
 router.get('/get-to-do-list', jwtToken.protect, todoListController.getTodoList);
-router.post('/update-todolist', jwtToken.protect, todoListController.updateTodoList);
+router.put('/update-todolist/:todolistId', jwtToken.protect, todoListController.updateTodoList);
+router.delete('/delete-todo/:deleteId', jwtToken.protect, todoListController.deleteTodoListId);
+
 
 module.exports = router;

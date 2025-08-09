@@ -73,3 +73,32 @@ exports.updateTodoList = async (req, res) => {
         res.status(500).json({ message: 'Server error updating To-Do.' });
     }
 };
+
+
+exports.deleteTodoListId = async (req, res) => {
+    const { deleteId } = req.params;
+    const userId = req.user.id;
+
+    if(!userId){
+        return res.status(400).json({
+            message: 'User not found. ',
+        });
+    }
+
+    try{
+        let deleteTodo = await TodoList.deleteOne({_id: deleteId, user: userId});
+        if(deleteTodo.deletedCount === 0){
+            return res.status(400).json({ message: 'To-Do-List is empty. ' });
+        }
+        
+        return res.status(200).json({
+            message: 'To-Do-List item deleted successffuly. '});
+    } catch (error) {
+        console.log('Error deleting todo: ', error);
+        return res.status(500).json({
+            message: 'Server error deleting To-Do.'
+        });
+    }
+};
+
+
