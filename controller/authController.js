@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const emailService = require('../utils/emailService');
 
 
 
@@ -25,8 +26,18 @@ exports.registerUser = async (req, res) => {
 
         const newUser = new User({ username, password });
         await newUser.save();
-
         console.log('Registered new user:', username); 
+
+        const welcomeSubject = 'Welcome to Your To-Do List App!';
+        const welcomeText = `Hello ${username},\n\nWe're excited to have you onboard.\n\nStart organizing your tasks and boosting your productivity today.\n\nBest regards,\nYour To-Do App Team`;
+        const welcomeHtml = `
+            <p>Hello <strong>${username}</strong>,</p>
+            <p>Welcome to your new To-Do List application! We're excited to have you onboard.</p>
+            <p>Start organizing your tasks and boosting your productivity today.</p>
+            <p>Best regards,</p>
+            <p>Your To-Do App Team</p>
+        `;
+        emailService.sendEmail(username, welcomeSubject, welcomeText, welcomeHtml);
         return res.status(201).json({ message: 'User registered successfully!' });
 
     } catch (error) {
