@@ -12,23 +12,48 @@ const UserSchema = new mongose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+
+    phoneNumber: {
+        type: String,
+        required: false,
+        unique: true,
+        sparse: true
+    },
+
+    otp: {
+        type: String,
+        required: false
+    },
+
+    otpExpiry: {
+        type: Date,
+        required: false
+    },
 }, {
     timestamps: true
 })
 
-UserSchema.pre('save', async function(next){
-    if(!this.isModified('password')){
-        return next();
+    UserSchema.pre('save', async function(next) {
+    if (this.isModified('password')) {
+        try {
+            const salt = await bcrypt.genSalt(10);
+            this.password = await bcrypt.hash(this.password, salt);
+        } catch (err) {
+            return next(err);
+        }
     }
 
-    try{
-        const salt = await bycrypt.genSalt(10);
-        this.password = await bycrypt.hash(this.password, salt);
-        next();
-    } catch (err) {
-        next(err);
+    if (this.isModified('otp') && this.otp) { 
+        try {
+            const salt = await bcrypt.genSalt(10);
+            this.otp = await bcrypt.hash(this.otp, salt);
+        } catch (err) {
+            return next(err);
+        }
     }
+
+    next();
 });
 
 const User = mongose.model('User', UserSchema);
